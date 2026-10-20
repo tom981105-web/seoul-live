@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SEOUL LIVE | 실시간 도시 상황판</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{font-family:system-ui,sans-serif;background:#091424;color:#edf7ff}*{box-sizing:border-box}body{margin:0}
+header{height:75px;display:flex;align-items:center;justify-content:space-between;padding:0 25px;background:#102139;border-bottom:1px solid #28445b}
+header strong{font-size:25px;letter-spacing:2px}header strong span{color:#3cd3e8}header small{color:#97adc5}
+.layout{display:grid;grid-template-columns:230px minmax(0,1fr)320px;height:calc(100vh - 75px)}
+aside{padding:20px;background:#11243b;overflow-y:auto}aside:last-child{border-left:1px solid #26435a}
+h2{font-size:18px}p{color:#a8bbcc;line-height:1.5}.place{padding:14px;margin:5px 0;width:100%;text-align:left;background:#1d344e;border:1px solid #34516b;border-radius:10px;color:#e7f3ff;cursor:pointer}
+.place:hover,.place.active{border-color:#5ce0ee;background:#264965}#map{height:100%;min-height:400px}
+.card{background:#1a314c;border:1px solid #35536d;border-radius:12px;padding:17px;margin:15px 0}
+.metric{font-size:28px;font-weight:750;margin:8px 0}button#refresh{border:0;border-radius:10px;background:#31c9dd;padding:13px;width:100%;cursor:pointer;font-weight:700}
+.note{font-size:12px;color:#8eaac0}.error{color:#ffa9af}
+@media(max-width:950px){.layout{grid-template-columns:1fr;grid-template-rows:auto 50vh auto;height:auto}aside{padding:12px}aside:first-child{display:block}#places{display:flex;gap:6px;overflow:auto}.place{min-width:130px}aside:last-child{border:0}}
+</style></head><body>
+<header><div><strong>SEOUL <span>LIVE</span></strong><div class="note">THE CITY, RIGHT NOW</div></div><small>공식 공공데이터 · MVP</small></header>
+<div class="layout">
+<aside><h2>주요 장소</h2><div id="places"></div></aside>
+<main id="map" aria-label="서울 주요 장소 지도"></main>
+<aside><h2 id="name">장소 선택</h2><p id="detail">지도의 마커나 왼쪽 버튼을 눌러보세요.</p>
+<div class="card"><div class="note">현재 혼잡도</div><div class="metric" id="congestion">—</div><p id="population">추정 인구: —</p></div>
+<div class="card"><div class="note">데이터 상태</div><div id="status">조회 대기</div><p id="updated">관측시각: —</p></div>
+<button id="refresh">다시 조회</button><p class="note">실제 API 수신값만 표시하며 샘플키로는 일부 장소만 조회됩니다. 자료가 지연될 수 있습니다.</p></aside>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const map=L.map("map").setView([37.55,126.98],11);
+L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap contributors &copy; CARTO"}).addTo(map);
+const el=id=>document.getElementById(id);let selected=null;
+async function json(url){const r=await fetch(url);if(!r.ok)throw Error("HTTP "+r.status);return r.json();}
+async function show(place){selected=place;el("name").textContent=place.name;el("detail").textContent="공공데이터 조회 중";el("congestion").textContent="조회 중";el("status").textContent="LOADING";map.flyTo([place.lat,place.lng],13);document.querySelectorAll(".place").forEach(b=>b.classList.toggle("active",b.dataset.id===place.id));
+try{const data=await json("/api/places/"+encodeURIComponent(place.id)+"/live");if(selected.id!==place.id)return;
+el("congestion").textContent=data.congestion||"정보 없음";el("population").textContent="추정 인구: "+(data.population_min==null?"—":data.population_min.toLocaleString()+" ~ "+data.population_max.toLocaleString()+"명");
+el("status").textContent=data.status;el("updated").textContent="관측시각: "+(data.observed_at||"제공 안 됨");el("detail").textContent=data.error?"API 조회 실패 ("+data.error+")":data.source;}
+catch(e){if(selected.id===place.id){el("status").textContent="API_ERROR";el("detail").textContent="요청 실패: "+String(e);}}}
+async function init(){try{const places=await json("/api/places");for(const p of places){const btn=document.createElement("button");btn.className="place";btn.dataset.id=p.id;btn.textContent="⌖ "+p.name;btn.onclick=()=>show(p);el("places").append(btn);L.circleMarker([p.lat,p.lng],{radius:9,color:"#72ecf0",weight:2,fillColor:"#0db8c6",fillOpacity:.85}).addTo(map).bindTooltip(p.name).on("click",()=>show(p));}if(places.length)show(places[0]);}catch(e){el("detail").textContent="목록 조회 실패";}}
+el("refresh").onclick=()=>selected&&show(selected);init();
+</script></body></html>
