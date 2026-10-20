@@ -22,9 +22,9 @@ h2{font-size:18px}p{color:#a8bbcc;line-height:1.5}.place{padding:14px;margin:5px
 .note{font-size:12px;color:#8eaac0}.error{color:#ffa9af}
 @media(max-width:950px){.layout{grid-template-columns:1fr;grid-template-rows:auto 50vh auto;height:auto}aside{padding:12px}aside:first-child{display:block}#places{display:flex;gap:6px;overflow:auto}.place{min-width:130px}aside:last-child{border:0}}
 </style></head><body>
-<header><div><strong>SEOUL <span>LIVE</span></strong><div class="note">THE CITY, RIGHT NOW</div></div><small>공식 공공데이터 · V0.6</small></header>
+<header><div><strong>SEOUL <span>LIVE</span></strong><div class="note">THE CITY, RIGHT NOW</div></div><small>공식 공공데이터 · V0.7</small></header>
 <div class="layout">
-<aside><h2>서울 혼잡도</h2><div class="controls"><input id="search" type="search" placeholder="장소 검색…" aria-label="장소 검색"><select id="district" aria-label="자치구 필터"><option value="all">서울 전체 자치구</option></select><select id="filter" aria-label="혼잡도 필터"><option value="all">전체 혼잡도</option><option value="여유">여유</option><option value="보통">보통</option><option value="약간 붐빔">약간 붐빔</option><option value="붐빔">붐빔</option><option value="매우 붐빔">매우 붐빔</option><option value="unknown">미제공·오류</option></select></div><div class="summary" id="summary">장소 정보 불러오는 중…</div><div class="legend"><span><i class="dot" style="background:#20bb84"></i>여유</span><span><i class="dot" style="background:#55bfe5"></i>보통</span><span><i class="dot" style="background:#f3b648"></i>약간 붐빔</span><span><i class="dot" style="background:#ec7850"></i>붐빔</span><span><i class="dot" style="background:#d74760"></i>매우 붐빔</span><span><i class="dot" style="background:#73879e"></i>미제공</span></div><div id="places"></div></aside>
+<aside><h2>서울 혼잡도</h2><div class="controls"><input id="search" type="search" placeholder="장소 검색…" aria-label="장소 검색"><select id="district" aria-label="장소 유형 필터"><option value="all">전체 장소 유형</option></select><select id="filter" aria-label="혼잡도 필터"><option value="all">전체 혼잡도</option><option value="여유">여유</option><option value="보통">보통</option><option value="약간 붐빔">약간 붐빔</option><option value="붐빔">붐빔</option><option value="매우 붐빔">매우 붐빔</option><option value="unknown">미제공·오류</option></select></div><div class="summary" id="summary">장소 정보 불러오는 중…</div><div class="legend"><span><i class="dot" style="background:#20bb84"></i>여유</span><span><i class="dot" style="background:#55bfe5"></i>보통</span><span><i class="dot" style="background:#f3b648"></i>약간 붐빔</span><span><i class="dot" style="background:#ec7850"></i>붐빔</span><span><i class="dot" style="background:#d74760"></i>매우 붐빔</span><span><i class="dot" style="background:#73879e"></i>미제공</span></div><div id="places"></div></aside>
 <main id="map" aria-label="서울 주요 장소 지도"><div style="padding:28px;color:#c6d7e7">서울 지도를 불러오는 중입니다…</div></main>
 <aside><h2 id="name">장소 선택</h2><p id="detail">지도의 마커나 왼쪽 버튼을 눌러보세요.</p>
 <div class="card"><div class="note">현재 혼잡도</div><div class="metric" id="congestion">—</div><p id="population">추정 인구: —</p></div>
@@ -50,7 +50,7 @@ function color(d){return COLORS[d?.congestion]||"#73879e";}
 function label(d){return d?.congestion||"미제공";}
 async function json(url){const r=await fetch(url);if(!r.ok)throw Error("HTTP "+r.status);return r.json();}
 const time=new Date().getTime();
-function matches(p){const q=el("search").value.trim().toLocaleLowerCase();const f=el("filter").value;const d=records[p.id];const region=el("district").value;return (region==="all"||p.district===region)&&p.name.toLocaleLowerCase().includes(q)&&(f==="all"||(f==="unknown"?!d?.congestion:(d?.congestion===f)));}
+function matches(p){const q=el("search").value.trim().toLocaleLowerCase();const f=el("filter").value;const d=records[p.id];const region=el("district").value;return (region==="all"||p.category===region)&&p.name.toLocaleLowerCase().includes(q)&&(f==="all"||(f==="unknown"?!d?.congestion:(d?.congestion===f)));}
 function draw(){
  visible=allPlaces.filter(matches);
  const list=el("places");list.replaceChildren();
@@ -83,7 +83,7 @@ el("detail").textContent=d?.error?"데이터 미제공 ("+d.error+")":(d?.source
 }
 async function init(){
 try{allPlaces=await json("./data/places.json?v="+time);
- const regions=[...new Set(allPlaces.map(p=>p.district).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"ko"));
+ const regions=[...new Set(allPlaces.map(p=>p.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"ko"));
  for(const region of regions){const option=document.createElement("option");option.value=region;option.textContent=region;el("district").append(option);}
 
  for(const p of allPlaces){
