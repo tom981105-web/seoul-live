@@ -14,6 +14,7 @@ def test_request_budget(monkeypatch, tmp_path):
     monkeypatch.setenv("SEOUL_API_KEY", "test-key")
     monkeypatch.setenv("SEOUL_MAX_CALLS", "3")
     monkeypatch.setattr(build_pages.time, "sleep", lambda _: None)
+    monkeypatch.setattr(build_pages, "previous_json", lambda _: None)
     called=[]
     def fake(place):
         called.append(place["id"])
