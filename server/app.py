@@ -29,6 +29,18 @@ PLACES = [
     {"id": "POI014", "name": "서울광장", "query": "서울광장", "lat": 37.5657, "lng": 126.978, "district": "중구"},
     {"id": "POI015", "name": "어린이대공원", "query": "어린이대공원", "lat": 37.5483, "lng": 127.0819, "district": "광진구"},
 ]
+def load_places():
+    """Only switch to the fully verified official catalog."""
+    path = Path(__file__).resolve().parent.parent / "data" / "official_places.json"
+    if not path.exists():
+        return PLACES
+    data = __import__("json").loads(path.read_text(encoding="utf-8"))
+    if (len(data) != 121 or len({p["id"] for p in data}) != 121
+            or not all(126.7 < p["lng"] < 127.3 and 37.3 < p["lat"] < 37.8 for p in data)):
+        raise ValueError("Invalid official places catalog")
+    return data
+
+PLACES = load_places()
 _cache: dict[str, tuple[float, dict]] = {}
 
 def _text(root: ET.Element, tag: str) -> str | None:
