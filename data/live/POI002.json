@@ -1,0 +1,14 @@
+{
+  "id": "POI002",
+  "name": "강남역",
+  "query": "강남역",
+  "lat": 37.4979,
+  "lng": 127.0276,
+  "congestion": null,
+  "population_min": null,
+  "population_max": null,
+  "observed_at": null,
+  "status": "UNAVAILABLE",
+  "source": "서울시 실시간 도시데이터",
+  "error": "DATA_NOT_YET_COLLECTED"
+}

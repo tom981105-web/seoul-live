@@ -1,0 +1,14 @@
+{
+  "id": "POI001",
+  "name": "광화문·덕수궁",
+  "query": "광화문·덕수궁",
+  "lat": 37.571,
+  "lng": 126.9769,
+  "congestion": null,
+  "population_min": null,
+  "population_max": null,
+  "observed_at": null,
+  "status": "UNAVAILABLE",
+  "source": "서울시 실시간 도시데이터",
+  "error": "DATA_NOT_YET_COLLECTED"
+}

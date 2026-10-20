@@ -1,0 +1,14 @@
+{
+  "id": "POI003",
+  "name": "홍대 관광특구",
+  "query": "홍대 관광특구",
+  "lat": 37.5558,
+  "lng": 126.9237,
+  "congestion": null,
+  "population_min": null,
+  "population_max": null,
+  "observed_at": null,
+  "status": "UNAVAILABLE",
+  "source": "서울시 실시간 도시데이터",
+  "error": "DATA_NOT_YET_COLLECTED"
+}
