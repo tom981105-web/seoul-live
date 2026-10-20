@@ -6,6 +6,7 @@ def test_build_without_key(monkeypatch):
     # Avoid network in CI; mock live adapter for sample place.
     monkeypatch.setattr("scripts.build_pages.fetch_citydata",
                         lambda place: {**place, "status": "API_ERROR", "congestion": None})
+    monkeypatch.setattr("scripts.build_pages.previous_json", lambda _: None)
     build()
     root = Path(__file__).resolve().parent.parent / "_site"
     assert (root / "index.html").exists()

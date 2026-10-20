@@ -41,7 +41,7 @@ def features_from_zip(path):
             if not name:raise ValueError("Missing shapefile component: "+ext)
             return archive.read(name)
         import io
-        reader=shapefile.Reader(shp=io.BytesIO(get(".shp")),shx=io.BytesIO(get(".shx")),dbf=io.BytesIO(get(".dbf")),encoding="cp949")
+        reader=shapefile.Reader(shp=io.BytesIO(get(".shp")),shx=io.BytesIO(get(".shx")),dbf=io.BytesIO(get(".dbf")),encoding="utf-8")
         crs=CRS.from_wkt(get(".prj").decode("utf-8-sig"))
         trans=Transformer.from_crs(crs,CRS.from_epsg(4326),always_xy=True)
         fields=[f[0] for f in reader.fields[1:]]
