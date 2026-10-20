@@ -13,21 +13,21 @@ from fastapi.responses import FileResponse
 app = FastAPI(title="SEOUL LIVE", version="0.1.0")
 # Representative marker coordinates, not official polygon centroids.
 PLACES = [
-    {"id": "POI001", "name": "광화문·덕수궁", "query": "광화문·덕수궁", "lat": 37.571, "lng": 126.9769},
-    {"id": "POI002", "name": "강남역", "query": "강남역", "lat": 37.4979, "lng": 127.0276},
-    {"id": "POI003", "name": "홍대 관광특구", "query": "홍대 관광특구", "lat": 37.5558, "lng": 126.9237},
-    {"id": "POI004", "name": "잠실 관광특구", "query": "잠실 관광특구", "lat": 37.5133, "lng": 127.1001},
-    {"id": "POI005", "name": "여의도한강공원", "query": "여의도한강공원", "lat": 37.526, "lng": 126.934},
-    {"id": "POI006", "name": "명동 관광특구", "query": "명동 관광특구", "lat": 37.5636, "lng": 126.9845},
-    {"id": "POI007", "name": "이태원 관광특구", "query": "이태원 관광특구", "lat": 37.5346, "lng": 126.9941},
-    {"id": "POI008", "name": "동대문 관광특구", "query": "동대문 관광특구", "lat": 37.5689, "lng": 127.0092},
-    {"id": "POI009", "name": "광화문광장", "query": "광화문광장", "lat": 37.5725, "lng": 126.9769},
-    {"id": "POI010", "name": "서울숲공원", "query": "서울숲공원", "lat": 37.5446, "lng": 127.0374},
-    {"id": "POI011", "name": "반포한강공원", "query": "반포한강공원", "lat": 37.5097, "lng": 126.9947},
-    {"id": "POI012", "name": "뚝섬한강공원", "query": "뚝섬한강공원", "lat": 37.5293, "lng": 127.0662},
-    {"id": "POI013", "name": "남산공원", "query": "남산공원", "lat": 37.5507, "lng": 126.9909},
-    {"id": "POI014", "name": "서울광장", "query": "서울광장", "lat": 37.5657, "lng": 126.978},
-    {"id": "POI015", "name": "어린이대공원", "query": "어린이대공원", "lat": 37.5483, "lng": 127.0819},
+    {"id": "POI001", "name": "광화문·덕수궁", "query": "광화문·덕수궁", "lat": 37.571, "lng": 126.9769, "district": "종로구"},
+    {"id": "POI002", "name": "강남역", "query": "강남역", "lat": 37.4979, "lng": 127.0276, "district": "강남구"},
+    {"id": "POI003", "name": "홍대 관광특구", "query": "홍대 관광특구", "lat": 37.5558, "lng": 126.9237, "district": "마포구"},
+    {"id": "POI004", "name": "잠실 관광특구", "query": "잠실 관광특구", "lat": 37.5133, "lng": 127.1001, "district": "송파구"},
+    {"id": "POI005", "name": "여의도한강공원", "query": "여의도한강공원", "lat": 37.526, "lng": 126.934, "district": "영등포구"},
+    {"id": "POI006", "name": "명동 관광특구", "query": "명동 관광특구", "lat": 37.5636, "lng": 126.9845, "district": "중구"},
+    {"id": "POI007", "name": "이태원 관광특구", "query": "이태원 관광특구", "lat": 37.5346, "lng": 126.9941, "district": "용산구"},
+    {"id": "POI008", "name": "동대문 관광특구", "query": "동대문 관광특구", "lat": 37.5689, "lng": 127.0092, "district": "중구"},
+    {"id": "POI009", "name": "광화문광장", "query": "광화문광장", "lat": 37.5725, "lng": 126.9769, "district": "종로구"},
+    {"id": "POI010", "name": "서울숲공원", "query": "서울숲공원", "lat": 37.5446, "lng": 127.0374, "district": "성동구"},
+    {"id": "POI011", "name": "반포한강공원", "query": "반포한강공원", "lat": 37.5097, "lng": 126.9947, "district": "서초구"},
+    {"id": "POI012", "name": "뚝섬한강공원", "query": "뚝섬한강공원", "lat": 37.5293, "lng": 127.0662, "district": "광진구"},
+    {"id": "POI013", "name": "남산공원", "query": "남산공원", "lat": 37.5507, "lng": 126.9909, "district": "용산구"},
+    {"id": "POI014", "name": "서울광장", "query": "서울광장", "lat": 37.5657, "lng": 126.978, "district": "중구"},
+    {"id": "POI015", "name": "어린이대공원", "query": "어린이대공원", "lat": 37.5483, "lng": 127.0819, "district": "광진구"},
 ]
 _cache: dict[str, tuple[float, dict]] = {}
 
