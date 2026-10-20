@@ -13,6 +13,7 @@ def test_request_budget(monkeypatch, tmp_path):
     monkeypatch.setattr(build_pages, "OUT", tmp_path / "out")
     monkeypatch.setenv("SEOUL_API_KEY", "test-key")
     monkeypatch.setenv("SEOUL_MAX_CALLS", "3")
+    monkeypatch.setenv("GITHUB_RUN_NUMBER", "1")
     monkeypatch.setattr(build_pages.time, "sleep", lambda _: None)
     monkeypatch.setattr(build_pages, "previous_json", lambda _: None)
     called=[]
@@ -26,3 +27,13 @@ def test_request_budget(monkeypatch, tmp_path):
     fourth=json.loads((build_pages.OUT/"data"/"live"/"POI004.json").read_text())
     assert fourth["status"]=="UNAVAILABLE"
     assert fourth["error"]=="REQUEST_BUDGET_EXCEEDED"
+
+from scripts.build_pages import choose_batch
+
+def test_rotating_selection():
+    catalog=[{"id":str(i)} for i in range(5)]
+    assert choose_batch(catalog,1,2)==["0","1"]
+    assert choose_batch(catalog,2,2)==["2","3"]
+    assert choose_batch(catalog,3,2)==["4","0"]
+    assert choose_batch(catalog,4,2)==["1","2"]
+    assert choose_batch(catalog,1,0)==[]

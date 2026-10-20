@@ -43,6 +43,14 @@ def keep_history(previous, record):
     unique = {p["observed_at"]: p for p in items}
     return sorted(unique.values(), key=lambda p: p["observed_at"])[-HISTORY_LIMIT:]
 
+def choose_batch(places, run_number, max_calls):
+    """Round-robin fixed-size slice with wrap-around, no unnecessary requests."""
+    if not places or max_calls <= 0:
+        return []
+    size = min(max_calls, len(places))
+    start = ((max(1, run_number) - 1) * size) % len(places)
+    return [places[(start+i) % len(places)]["id"] for i in range(size)]
+
 def build():
     if OUT.exists():
         shutil.rmtree(OUT)
@@ -56,11 +64,14 @@ def build():
     history_dir.mkdir(parents=True, exist_ok=True)
     key = os.environ.get("SEOUL_API_KEY", "").strip()
     max_calls = max(0, min(int(os.environ.get("SEOUL_MAX_CALLS", "15")), 15))
+    run_number = int(os.environ.get("GITHUB_RUN_NUMBER", "1"))
+    eligible = [p for p in PLACES if key or p["id"] == "POI001"]
+    batch_ids = set(choose_batch(eligible, run_number, max_calls))
     calls = 0
     for place in PLACES:
         previous = previous_json("live/" + place["id"] + ".json")
         history = previous_json("history/" + place["id"] + ".json")
-        if (key or place["id"] == "POI001") and calls < max_calls:
+        if place["id"] in batch_ids:
             calls += 1
             if calls > 1:
                 time.sleep(0.25)
@@ -81,7 +92,7 @@ def build():
             json.dumps(latest_history, ensure_ascii=False, indent=2), encoding="utf-8")
         (folder / (place["id"] + ".json")).write_text(
             json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"Pages artifact ready: {OUT}; API requests: {calls}/{max_calls}")
+    print(f"Pages artifact ready: {OUT}; API requests: {calls}/{max_calls}; rotation: {run_number}")
 
 if __name__ == "__main__":
     build()
