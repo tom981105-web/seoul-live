@@ -1,0 +1,14 @@
+{
+  "id": "POI004",
+  "name": "잠실 관광특구",
+  "query": "잠실 관광특구",
+  "lat": 37.5133,
+  "lng": 127.1001,
+  "congestion": null,
+  "population_min": null,
+  "population_max": null,
+  "observed_at": null,
+  "status": "UNAVAILABLE",
+  "source": "서울시 실시간 도시데이터",
+  "error": "DATA_NOT_YET_COLLECTED"
+}
