@@ -22,7 +22,7 @@ h2{font-size:18px}p{color:#a8bbcc;line-height:1.5}.place{padding:14px;margin:5px
 <aside><h2 id="name">장소 선택</h2><p id="detail">지도의 마커나 왼쪽 버튼을 눌러보세요.</p>
 <div class="card"><div class="note">현재 혼잡도</div><div class="metric" id="congestion">—</div><p id="population">추정 인구: —</p></div>
 <div class="card"><div class="note">데이터 상태</div><div id="status">조회 대기</div><p id="updated">관측시각: —</p></div>
-<button id="refresh">다시 조회</button><p class="note">실제 API 수신값만 표시하며 샘플키로는 일부 장소만 조회됩니다. 자료가 지연될 수 있습니다.</p></aside>
+<button id="refresh">다시 조회</button><p class="note">GitHub Actions가 수집한 공개 스냅샷입니다. 실시간 직접 조회가 아니며 갱신 지연·미제공 정보를 구분합니다.</p></aside>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -30,11 +30,11 @@ const map=L.map("map").setView([37.55,126.98],11);
 L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap contributors &copy; CARTO"}).addTo(map);
 const el=id=>document.getElementById(id);let selected=null;
 async function json(url){const r=await fetch(url);if(!r.ok)throw Error("HTTP "+r.status);return r.json();}
-async function show(place){selected=place;el("name").textContent=place.name;el("detail").textContent="공공데이터 조회 중";el("congestion").textContent="조회 중";el("status").textContent="LOADING";map.flyTo([place.lat,place.lng],13);document.querySelectorAll(".place").forEach(b=>b.classList.toggle("active",b.dataset.id===place.id));
-try{const data=await json("/api/places/"+encodeURIComponent(place.id)+"/live");if(selected.id!==place.id)return;
+async function show(place){selected=place;el("name").textContent=place.name;el("detail").textContent="공개 데이터 스냅샷 조회 중";el("congestion").textContent="조회 중";el("status").textContent="LOADING";map.flyTo([place.lat,place.lng],13);document.querySelectorAll(".place").forEach(b=>b.classList.toggle("active",b.dataset.id===place.id));
+try{const data=await json("./data/live/"+encodeURIComponent(place.id)+".json?v="+Date.now());if(selected.id!==place.id)return;
 el("congestion").textContent=data.congestion||"정보 없음";el("population").textContent="추정 인구: "+(data.population_min==null?"—":data.population_min.toLocaleString()+" ~ "+data.population_max.toLocaleString()+"명");
-el("status").textContent=data.status;el("updated").textContent="관측시각: "+(data.observed_at||"제공 안 됨");el("detail").textContent=data.error?"API 조회 실패 ("+data.error+")":data.source;}
+el("status").textContent=data.status;el("updated").textContent="관측시각: "+(data.observed_at||"제공 안 됨");el("detail").textContent=data.error?"데이터 조회 불가 ("+data.error+")":(data.source||"서울시 공공데이터")+" · 수집: "+(data.fetched_at||"미확인");}
 catch(e){if(selected.id===place.id){el("status").textContent="API_ERROR";el("detail").textContent="요청 실패: "+String(e);}}}
-async function init(){try{const places=await json("/api/places");for(const p of places){const btn=document.createElement("button");btn.className="place";btn.dataset.id=p.id;btn.textContent="⌖ "+p.name;btn.onclick=()=>show(p);el("places").append(btn);L.circleMarker([p.lat,p.lng],{radius:9,color:"#72ecf0",weight:2,fillColor:"#0db8c6",fillOpacity:.85}).addTo(map).bindTooltip(p.name).on("click",()=>show(p));}if(places.length)show(places[0]);}catch(e){el("detail").textContent="목록 조회 실패";}}
+async function init(){try{const places=await json("./data/places.json?v="+Date.now());for(const p of places){const btn=document.createElement("button");btn.className="place";btn.dataset.id=p.id;btn.textContent="⌖ "+p.name;btn.onclick=()=>show(p);el("places").append(btn);L.circleMarker([p.lat,p.lng],{radius:9,color:"#72ecf0",weight:2,fillColor:"#0db8c6",fillOpacity:.85}).addTo(map).bindTooltip(p.name).on("click",()=>show(p));}if(places.length)show(places[0]);}catch(e){el("detail").textContent="목록 조회 실패";}}
 el("refresh").onclick=()=>selected&&show(selected);init();
 </script></body></html>
