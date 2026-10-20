@@ -52,3 +52,9 @@ python -m pytest -q
 - 지도에서 자치구를 선택하면 해당 장소만 필터링됩니다.
 - `GITHUB_RUN_NUMBER`에 따른 라운드로빈 수집: `SEOUL_MAX_CALLS`를 15보다 작게 조절해도 배포마다 다음 장소를 순서대로 수집합니다. 매번 선택되지 않은 장소는 이전 공개 스냅샷을 DELAYED 상태로 표시합니다.
 - 공식 장소 121개 목록 XLSX와 영역 ZIP은 [서울 열린데이터광장](https://data.seoul.go.kr/dataList/OA-21285/F/1/datasetView.do) 제공 자료입니다. 공식 좌표 및 경계 도입은 추후 검증·반영합니다.
+
+## V0.6 — 마커 클러스터 및 공식 목록 검증 도구
+- MarkerCluster를 이용해 멀리서 겹치는 마커를 합치고 확대하면 분리합니다. 라이브러리 로딩이 안 될 때는 기본 레이어로 작동합니다.
+- 공식 121개 목록 XLSX를 직접 다운로드한 후 `python -m scripts.validate_places /path/to/official.xlsx`로 121개 고유 장소명·코드 검증이 가능합니다. 이 도구는 운영 목록을 자동 교체하지 않습니다.
+- 좌표는 공식 영역 ZIP의 좌표계·경계를 별도로 변환·검증한 후 반영해야 합니다. 현재 등록 장소는 15개입니다.
+- `data/collection-status.json`에 배포별 수집 요청 수와 카탈로그 규모를 기록합니다.

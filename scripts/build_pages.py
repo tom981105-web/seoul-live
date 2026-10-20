@@ -92,6 +92,11 @@ def build():
             json.dumps(latest_history, ensure_ascii=False, indent=2), encoding="utf-8")
         (folder / (place["id"] + ".json")).write_text(
             json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")
+    (OUT / "data" / "collection-status.json").write_text(
+        json.dumps({"run_number": run_number, "requests": calls,
+                    "budget": max_calls, "catalog_size": len(PLACES),
+                    "generated_at": datetime.now(timezone.utc).isoformat()},
+                   ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Pages artifact ready: {OUT}; API requests: {calls}/{max_calls}; rotation: {run_number}")
 
 if __name__ == "__main__":
