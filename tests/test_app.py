@@ -8,7 +8,7 @@ def test_health():
     assert client.get("/api/health").json()["ok"] is True
 
 def test_places():
-    assert len(client.get("/api/places").json()) == 15
+    assert len(client.get("/api/places").json()) == 121
 
 def test_missing_place():
     assert client.get("/api/places/unknown/live").status_code == 404
