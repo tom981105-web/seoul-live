@@ -29,7 +29,7 @@ h2{font-size:18px}p{color:#a8bbcc;line-height:1.5}.place{padding:14px;margin:5px
 function startApp(){
 if(!window.L){document.getElementById("map").innerHTML='<div style="padding:28px;color:#ffc2a0">지도 라이브러리를 불러올 수 없습니다. 브라우저 네트워크 또는 CDN 차단을 확인하세요.</div>';return;}
 const map=L.map("map").setView([37.55,126.98],11);
-L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap contributors &copy; CARTO"}).addTo(map);
+L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap contributors"}).addTo(map);
 const el=id=>document.getElementById(id);let selected=null;
 async function json(url){const r=await fetch(url);if(!r.ok)throw Error("HTTP "+r.status);return r.json();}
 async function show(place){selected=place;el("name").textContent=place.name;el("detail").textContent="공개 데이터 스냅샷 조회 중";el("congestion").textContent="조회 중";el("status").textContent="LOADING";map.flyTo([place.lat,place.lng],13);document.querySelectorAll(".place").forEach(b=>b.classList.toggle("active",b.dataset.id===place.id));
