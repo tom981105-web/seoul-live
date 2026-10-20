@@ -16,9 +16,9 @@ def validate(path):
         rows=list(ws.iter_rows(values_only=True))
         for i,row in enumerate(rows):
             labels=[str(v).strip() if v is not None else "" for v in row]
-            if any("장소" in v and ("명" in v or "이름" in v) for v in labels):
-                name_col=next(j for j,v in enumerate(labels) if "장소" in v and ("명" in v or "이름" in v))
-                code_col=next((j for j,v in enumerate(labels) if "코드" in v),None)
+            if any(v in ("AREA_NM","장소명","장소이름") for v in labels):
+                name_col=next(j for j,v in enumerate(labels) if v in ("AREA_NM","장소명","장소이름"))
+                code_col=next((j for j,v in enumerate(labels) if v in ("AREA_CD","장소코드","장소 코드")),None)
                 if code_col is None:continue
                 records=[]
                 for data in rows[i+1:]:
