@@ -134,8 +134,8 @@ def build():
             cameras = fetch_cameras(its_key)
             cctv_path.write_text(json.dumps(cameras, ensure_ascii=False), encoding="utf-8")
             print(f"ITS CCTV metadata: {len(cameras)} cameras")
-        except (OSError, ValueError, KeyError, TypeError):
-            print("ITS CCTV metadata unavailable; retaining local safe fallback")
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            print("ITS CCTV metadata unavailable; retaining local safe fallback (" + type(exc).__name__ + ")")
     print(f"Pages artifact ready: {OUT}; API requests: {calls}/{max_calls}; rotation: {run_number}")
 
 if __name__ == "__main__":
