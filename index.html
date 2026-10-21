@@ -26,7 +26,7 @@ h2{font-size:18px}p{color:#a8bbcc;line-height:1.5}.place{padding:14px;margin:5px
 .note{font-size:12px;color:#8eaac0}.error{color:#ffa9af}
 @media(max-width:950px){.layout{grid-template-columns:1fr;grid-template-rows:auto 50vh auto;height:auto}aside{padding:12px}aside:first-child{display:block}#places{display:flex;gap:6px;overflow:auto}.place{min-width:130px}aside:last-child{border:0}}
 </style></head><body>
-<header><div><strong>SEOUL <span>LIVE</span></strong><div class="note">THE CITY, RIGHT NOW</div></div><small>공식 공공데이터 · V0.8.2</small></header>
+<header><div><strong>SEOUL <span>LIVE</span></strong><div class="note">THE CITY, RIGHT NOW</div></div><small>공식 공공데이터 · V0.8.3</small></header>
 <div class="layout">
 <aside><h2>서울 혼잡도</h2><div class="controls"><input id="search" type="search" placeholder="장소 검색…" aria-label="장소 검색"><select id="district" aria-label="장소 유형 필터"><option value="all">전체 장소 유형</option></select><select id="filter" aria-label="혼잡도 필터"><option value="all">전체 혼잡도</option><option value="여유">여유</option><option value="보통">보통</option><option value="약간 붐빔">약간 붐빔</option><option value="붐빔">붐빔</option><option value="매우 붐빔">매우 붐빔</option><option value="unknown">미제공·오류</option></select></div><div class="summary" id="summary">장소 정보 불러오는 중…</div><div class="legend"><span><i class="dot" style="background:#20bb84"></i>여유</span><span><i class="dot" style="background:#55bfe5"></i>보통</span><span><i class="dot" style="background:#f3b648"></i>약간 붐빔</span><span><i class="dot" style="background:#ec7850"></i>붐빔</span><span><i class="dot" style="background:#d74760"></i>매우 붐빔</span><span><i class="dot" style="background:#73879e"></i>미제공</span></div><div id="places"></div></aside>
 <main id="map" aria-label="서울 주요 장소 지도"><div style="padding:28px;color:#c6d7e7">서울 지도를 불러오는 중입니다…</div></main>
@@ -87,7 +87,7 @@ function renderCctv(place){
  const list=el("cctv-list");list.replaceChildren();
  const cams=availableCctv.map(c=>({...c,distance:kmBetween(place.lat,place.lng,c.lat,c.lng)})).filter(c=>c.distance<=3).sort((a,b)=>a.distance-b.distance).slice(0,3);
  if(!cams.length){
-  const p=document.createElement("p");p.className="note";p.textContent=cctvReady?"검증된 주변 CCTV 정보가 없습니다. TOPIS에서 직접 확인하세요.":"공식 CCTV 목록을 아직 연결하지 않았습니다. TOPIS에서 확인하세요.";list.append(p);return;
+  const p=document.createElement("p");p.className="note";p.textContent=cctvReady?"반경 3km 내 등록된 교통 CCTV가 없습니다. TOPIS에서 직접 확인하세요.":"공식 CCTV 목록을 아직 연결하지 않았습니다. TOPIS에서 확인하세요.";list.append(p);return;
  }
  for(const c of cams){
   const card=document.createElement("div");card.className="cctv-item";
