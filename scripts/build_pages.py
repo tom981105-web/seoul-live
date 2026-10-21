@@ -8,6 +8,7 @@ import shutil
 import time
 import urllib.request
 import urllib.error
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -51,6 +52,23 @@ def choose_batch(places, run_number, max_calls):
     start = ((max(1, run_number) - 1) * size) % len(places)
     return [places[(start+i) % len(places)]["id"] for i in range(size)]
 
+def compatible_snapshot(place, old):
+    """Reject old snapshots with an ID that was reassigned to a different place."""
+    return (isinstance(old, dict) and old.get("id") == place["id"]
+            and old.get("name") == place["name"])
+
+def load_previous(places):
+    """Download immutable published JSON concurrently, outside API request budget."""
+    def load(place):
+        id_ = place["id"]
+        old = previous_json("live/" + id_ + ".json")
+        hist = previous_json("history/" + id_ + ".json")
+        if not compatible_snapshot(place, old):
+            return id_, None, None
+        return id_, old, hist
+    with ThreadPoolExecutor(max_workers=12) as executor:
+        return {id_: (old, hist) for id_, old, hist in executor.map(load, places)}
+
 def build():
     if OUT.exists():
         shutil.rmtree(OUT)
@@ -67,15 +85,22 @@ def build():
     run_number = int(os.environ.get("GITHUB_RUN_NUMBER", "1"))
     eligible = [p for p in PLACES if key or p["id"] == "POI001"]
     batch_ids = set(choose_batch(eligible, run_number, max_calls))
+    previous_cache = load_previous(PLACES)
     calls = 0
+    successful = 0
+    failed = 0
+    preserved = 0
     for place in PLACES:
-        previous = previous_json("live/" + place["id"] + ".json")
-        history = previous_json("history/" + place["id"] + ".json")
+        previous, history = previous_cache[place["id"]]
         if place["id"] in batch_ids:
             calls += 1
             if calls > 1:
                 time.sleep(0.25)
             record = fetch_citydata(place)
+            if record.get("status") == "LIVE":
+                successful += 1
+            else:
+                failed += 1
         else:
             record = {**place, "congestion": None, "population_min": None,
                       "population_max": None, "observed_at": None,
@@ -84,6 +109,7 @@ def build():
                       "error": "API_KEY_REQUIRED" if not key and place["id"] != "POI001" else "REQUEST_BUDGET_EXCEEDED"}
         if record.get("status") != "LIVE" and isinstance(previous, dict) and previous.get("congestion") and previous.get("observed_at"):
             record = {**previous, "status": "DELAYED", "error": record.get("error", "NOT_REFRESHED")}
+            preserved += 1
         elif record.get("status") == "LIVE" and record.get("observed_at") == (previous or {}).get("observed_at"):
             # Repeated source observation must not be shown as newly updated.
             record = {**record, "status": "DELAYED", "error": "OBSERVATION_UNCHANGED"}
@@ -95,6 +121,9 @@ def build():
     (OUT / "data" / "collection-status.json").write_text(
         json.dumps({"run_number": run_number, "requests": calls,
                     "budget": max_calls, "catalog_size": len(PLACES),
+                    "successful": successful, "failed": failed,
+                    "preserved_previous": preserved,
+                    "not_queried": len(PLACES) - calls,
                     "generated_at": datetime.now(timezone.utc).isoformat()},
                    ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Pages artifact ready: {OUT}; API requests: {calls}/{max_calls}; rotation: {run_number}")
