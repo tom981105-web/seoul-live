@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from server.app import PLACES, fetch_citydata
+from scripts.its_cctv import fetch_cameras
 
 PUBLIC_BASE = "https://tom981105-web.github.io/seoul-live/data/"
 HISTORY_LIMIT = 48
@@ -126,6 +127,15 @@ def build():
                     "not_queried": len(PLACES) - calls,
                     "generated_at": datetime.now(timezone.utc).isoformat()},
                    ensure_ascii=False, indent=2), encoding="utf-8")
+    its_key = os.environ.get("ITS_API_KEY", "").strip()
+    cctv_path = OUT / "data" / "cctv.json"
+    if its_key:
+        try:
+            cameras = fetch_cameras(its_key)
+            cctv_path.write_text(json.dumps(cameras, ensure_ascii=False), encoding="utf-8")
+            print(f"ITS CCTV metadata: {len(cameras)} cameras")
+        except (OSError, ValueError, KeyError, TypeError):
+            print("ITS CCTV metadata unavailable; retaining local safe fallback")
     print(f"Pages artifact ready: {OUT}; API requests: {calls}/{max_calls}; rotation: {run_number}")
 
 if __name__ == "__main__":
